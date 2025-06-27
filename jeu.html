@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeu du Devinette</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        h3 {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+
+        form {
+            background: white;
+            color: #333;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            width: 300px;
+        }
+
+        label {
+            font-size: 1rem;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        input[type="number"], select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        button {
+            background: #6a11cb;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.3s ease;
+            width: 100%;
+        }
+
+        button:hover {
+            background: #2575fc;
+        }
+
+        p {
+            margin: 10px 0;
+            font-size: 1.1rem;
+        }
+
+        .result {
+            font-weight: bold;
+        }
+
+        #rejouer {
+            display: none;
+            margin-top: 20px;
+            background: #fc5c7d;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>Bienvenue au jeu du Devinette!</h1>
+    <h3>Choisissez un niveau et tentez de deviner le nombre secret!</h3>
+
+    <form id="devinetteForm">
+        <label for="niveau">Choisissez le niveau de difficulté :</label>
+        <select id="niveau">
+            <option value="50">Débutant (1-50)</option>
+            <option value="100" selected>Avancé (1-100)</option>
+            <option value="1000">Expert (1-1000)</option>
+        </select>
+        <label for="nombre">Devinez un nombre :</label>
+        <input type="number" id="nombre" min="1" max="100" placeholder="Entrez un nombre" required>
+        <button type="button" id="envoyer">Envoyer</button>
+    </form>
+
+    <p id="message" class="result"></p>
+    <p id="tentatives"></p>
+    <button type="button" id="rejouer">Rejouer</button>
+
+    <script>
+        // Variables globales
+        const form = document.getElementById("devinetteForm");
+        const niveauSelect = document.getElementById("niveau");
+        const input = document.getElementById("nombre");
+        const envoyer = document.getElementById("envoyer");
+        const message = document.getElementById("message");
+        const tentatives = document.getElementById("tentatives");
+        const rejouer = document.getElementById("rejouer");
+        
+        let nb_a_deviner = Math.floor(Math.random() * parseInt(niveauSelect.value)) + 1;
+        let tentative = 0;
+        let maxTentatives = 10;
+        let devine = false;
+        let startTime = Date.now();
+
+        // Réinitialiser le jeu
+        function resetGame() {
+            nb_a_deviner = Math.floor(Math.random() * parseInt(niveauSelect.value)) + 1;
+            tentative = 0;
+            devine = false;
+            startTime = Date.now();
+            message.textContent = "";
+            tentatives.textContent = "";
+            input.value = "";
+            rejouer.style.display = "none";
+        }
+
+        // Gestion des niveaux de difficulté
+        niveauSelect.addEventListener("change", function () {
+            resetGame();
+            message.textContent = `Niveau changé : 1-${niveauSelect.value}. Bonne chance!`;
+        });
+
+        // Gestionnaire pour le bouton Envoyer
+        envoyer.addEventListener("click", function () {
+            if (devine) {
+                message.textContent = "Vous avez déjà trouvé le nombre!";
+                return;
+            }
+
+            const nombreUser = parseInt(input.value);
+            tentative++;
+
+            if (isNaN(nombreUser) || nombreUser < 1 || nombreUser > parseInt(niveauSelect.value)) {
+                message.textContent = `Entrez un nombre valide entre 1 et ${niveauSelect.value}.`;
+                return;
+            }
+
+            if (tentative > maxTentatives) {
+                message.textContent = `Vous avez épuisé vos ${maxTentatives} essais! Le nombre était ${nb_a_deviner}.`;
+                rejouer.style.display = "block";
+                return;
+            }
+
+            if (nombreUser < nb_a_deviner) {
+                message.textContent = "C'est trop petit!";
+            } else if (nombreUser > nb_a_deviner) {
+                message.textContent = "C'est trop grand!";
+            } else {
+                const tempsEcoule = Math.floor((Date.now() - startTime) / 1000);
+                message.textContent = `Bravo! Vous avez trouvé ${nb_a_deviner} en ${tentative} tentatives et ${tempsEcoule} secondes.`;
+                devine = true;
+                rejouer.style.display = "block";
+            }
+
+            tentatives.textContent = `Tentatives : ${tentative}/${maxTentatives}`;
+        });
+
+        // Gestionnaire pour le bouton Rejouer
+        rejouer.addEventListener("click", resetGame);
+    </script>
+</body>
+</html>
